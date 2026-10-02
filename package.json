@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "npm run build --prefix frontend",
-    "start": "npm run start --prefix frontend"
+    "build": "npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "serve -s frontend/dist -l ${PORT:-3000}"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
   }
 }

@@ -194,17 +194,27 @@ export const productSchema = z.object({
           'Product description must be at least 10 characters'
         ),
 
-      // Main product category used by the store navigation.
-      category: z
-        .enum([
-          'Dinnerware',
-          'Drinkware',
-          'Serveware',
-          'Gifting',
-        ]),
+      // ------------------------------------------------------
+      // Product category
+      // ------------------------------------------------------
 
-      // Optional Dinnerware collection/subcategory.
-      // It is only meaningful when category is Dinnerware.
+      category: z.enum([
+        'Dinnerware',
+        'Drinkware',
+        'Serveware',
+        'Gifting',
+
+        // Legacy categories
+        'Dinner Sets',
+        'Plates',
+        'Bowls',
+        'Cups & Mugs'
+      ]),
+
+      // ------------------------------------------------------
+      // Dinnerware collection
+      // ------------------------------------------------------
+
       dinnerwareCollection: z
         .union([
           z.enum([
@@ -219,8 +229,10 @@ export const productSchema = z.object({
         .nullable()
         .optional(),
 
-      // HSN code is required for every product.
-      // Leading zeroes are preserved by keeping it as a string.
+      // ------------------------------------------------------
+      // HSN CODE
+      // ------------------------------------------------------
+
       hsnCode: z
         .string()
         .trim()
@@ -328,6 +340,62 @@ export const productSchema = z.object({
         .optional(),
 
       // ------------------------------------------------------
+      // SHIPPING PACKAGE DETAILS
+      // Used for Velocity Shipping
+      //
+      // weight  = KG
+      // length  = CM
+      // breadth = CM
+      // height  = CM
+      // ------------------------------------------------------
+
+      shipping: z.object({
+        weight: z
+          .coerce
+          .number()
+          .finite(
+            'Shipping weight must be a valid number'
+          )
+          .min(
+            0.001,
+            'Shipping weight must be greater than 0'
+          ),
+
+        length: z
+          .coerce
+          .number()
+          .finite(
+            'Shipping length must be a valid number'
+          )
+          .min(
+            0.1,
+            'Shipping length must be greater than 0'
+          ),
+
+        breadth: z
+          .coerce
+          .number()
+          .finite(
+            'Shipping breadth must be a valid number'
+          )
+          .min(
+            0.1,
+            'Shipping breadth must be greater than 0'
+          ),
+
+        height: z
+          .coerce
+          .number()
+          .finite(
+            'Shipping height must be a valid number'
+          )
+          .min(
+            0.1,
+            'Shipping height must be greater than 0'
+          )
+      }),
+
+      // ------------------------------------------------------
       // Product tags
       // ------------------------------------------------------
 
@@ -339,7 +407,10 @@ export const productSchema = z.object({
             .min(1, 'Tag cannot be empty')
             .max(50, 'Tag cannot exceed 50 characters')
         )
-        .max(20, 'Maximum 20 tags are allowed')
+        .max(
+          20,
+          'Maximum 20 tags are allowed'
+        )
         .optional()
     })
 
@@ -348,6 +419,7 @@ export const productSchema = z.object({
     // --------------------------------------------------------
 
     .superRefine((data, ctx) => {
+      // Selling price cannot exceed MRP
       if (data.price > data.mrp) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -357,6 +429,7 @@ export const productSchema = z.object({
         })
       }
 
+      // Dinnerware collection only for Dinnerware category
       if (
         data.category !== 'Dinnerware' &&
         data.dinnerwareCollection

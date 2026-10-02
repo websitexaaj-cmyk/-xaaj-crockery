@@ -367,24 +367,9 @@ app.use(errorHandler)
 
 await connectDatabase()
 
-let server
-
-if (
-  env.nodeEnv !== 'production'
-) {
-
-  server = app.listen(
-    env.port,
-    () => {
-
-      console.log(
-        `[XAAJ] API listening on port ${env.port}`
-      )
-
-    }
-  )
-
-}
+const server = app.listen(env.port,() =>{
+  console.log('[XAAZ] API listening on port', env.port);
+});
 
 
 // ============================================================
